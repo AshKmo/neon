@@ -1,0 +1,35 @@
+- User
+- Role
+	- name
+	- children (roles inherit permissions from parents)
+	- permissions
+		- create child (only works if parent has the permissions the child has)
+		- edit child (only works if parent has the permissions the child has)
+		- delete child
+		- create user
+		- user permissions (only work on people with lesser permissions)
+			- edit user
+			- kick user
+			- add user
+			- add role to user
+- Template
+	- name
+	- permissions (per role)
+		- edit
+		- instantiate
+	- necessary fields (location, time period, people involved, content, etc.)
+- Item
+	- name
+	- type (determined by the name of the Template that instantiated it)
+	- permissions (per role)
+		- view
+		- edit
+		- delete
+	- location
+	- time period
+	- people involved
+	- content
+		- Markdown text boxes
+		- plans
+		- lists
+		- files
