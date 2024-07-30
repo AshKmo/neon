@@ -2,10 +2,13 @@
 - Role
 	- name
 	- children (roles inherit permissions from parents)
-	- permissions
+	- permission grants
+		- create Template
+		- create Item
 		- create child (only works if parent has the permissions the child has)
 		- edit child (only works if parent has the permissions the child has)
 		- delete child
+		- move child
 		- create user
 		- user permissions (only work on people with lesser permissions)
 			- edit user
@@ -16,16 +19,18 @@
 	- name
 	- permissions (per role)
 		- edit
+		- delete
 		- instantiate
 	- necessary fields (location, time period, people involved, content, etc.)
 - Item
 	- name
-	- type (determined by the name of the Template that instantiated it)
+	- type (determined by the Template that instantiated it)
 	- permissions (per role)
 		- view
 		- edit
 		- delete
 	- location
+	- appearance (an image that is returned when a browser tries to use this item's endpoint as an image)
 	- time period
 	- people involved
 	- content

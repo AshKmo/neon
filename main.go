@@ -19,7 +19,6 @@ func main() {
 	mux.Handle("/", http.FileServer(http.Dir("site")))
 
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hi"))
 	})
 
 	fmt.Println("Server started at " + addr)
