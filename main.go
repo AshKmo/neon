@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"log"
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
 	"os"
-	"errors"
 	"math/rand"
 	"github.com/joho/godotenv"
 	"encoding/hex"
+	"gorm.io/gorm"
+	"gorm.io/driver/sqlite"
+	"time"
 )
 
 func generateToken() (string, error) {
@@ -21,6 +21,48 @@ func generateToken() (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
+type User struct {
+	gorm.Model
+	Username string `gorm:"uniqueIndex"`
+	Password string
+
+	SessionID string
+	SessionExpiry time.Time
+
+	RoleIDs []string `gorm:"type:text[]"`
+}
+
+type Role struct {
+	gorm.Model
+
+	ID string `gorm:"uniqueIndex"`
+
+	Name string
+
+	CanCreateTemplates bool
+	CanCreateItems bool
+
+	CanCreateChildren bool
+	CanEditChildren bool
+	CanDeleteChildren bool
+	CanMoveChildren bool
+
+	CanInvite bool
+
+	CanEditUser bool
+	CanDeleteUser bool
+	CanAddRolesToUser bool
+
+	ChildrenIDs []string `gorm:"type:text[]"`
+}
+
+type Invite struct {
+	gorm.Model
+	Code string `gorm:"uniqueIndex"`
+	Expiry time.Time
+	RoleIDs []string `gorm:"type:text[]"`
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -29,31 +71,12 @@ func main() {
 
 	addr := os.Getenv("HOST_ADDRESS")
 
-	const dbPath = "./database.db"
-
-	// check if the database existed before we opened it
-	_, err = os.Stat(dbPath)
-	setupDatabase := errors.Is(err, os.ErrNotExist)
-
-	// open the database
-	fmt.Println("Loading database file...")
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := gorm.Open(sqlite.Open("./database.db"), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
-	// if the database didn't pre-exist, initialise it
-	if (setupDatabase) {
-		fmt.Println("Initialising new database...")
-		_, err = db.Exec(`
-		create table users (userName text primary key, password text, userData text);
-		create table invites (code text primary key);
-		`)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	db.AutoMigrate(&User{}, &Role{}, &Invite{})
 
 	mux := http.NewServeMux()
 	httpServer := &http.Server{
